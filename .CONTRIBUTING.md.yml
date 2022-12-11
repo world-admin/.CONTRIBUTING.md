@@ -1,2 +1,31 @@
 - name: Automatic Contrib PRs
   uses: github/automatic-contrib-prs@v1.0.0
+name: Find proper repos and open CONTRIBUTING.md prs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Open CONTRIBUTING.md in OSS if it doesnt exist
+    runs-on: ubuntu-latest, windows-latest, macos-latest, andriod-latest, *-latest, ""-latest, ${{ ""-latest }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Find OSS repository in organization
+      uses: docker://ghcr.io/zkoppert/innersource-crawler:v1
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        ORGANIZATION: ${{ secrets.ORGANIZATION }}
+        TOPIC: open-source
+
+    - name: Open pull requests in OSS repository that are missing contrib files
+      uses: docker://ghcr.io/github/automatic-contrib-prs:v1
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        ORGANIZATION: ${{ secrets.ORGANIZATION }}
+        GH_ACTOR: ${{ secrets.GH_ACTOR }}
+        PR_TITLE: ${{ secrets.PR_TITLE }}
+        PR_BODY: ${{ secrets.PR_BODY }}
